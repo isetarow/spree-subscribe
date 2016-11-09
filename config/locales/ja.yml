@@ -1,0 +1,39 @@
+# Sample localization file for English. Add more files in this directory for other locales.
+# See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
+
+ja:
+  subscribe:
+    subscription:
+      one: "定期購入"
+      other: "定期購入"
+    users_show_title: "契約中の定期購入"
+    no_subscriptions_available: "まだ定期購入がありません。"
+    product: "商品"
+    products:
+      one: "商品"
+      other: "商品"
+    user: "ユーザー"
+    price: "価格"
+    interval: "毎に配送"
+    reorder_on: "再注文日時"
+    state: "状態"
+    suspend_subscription: "中断"
+    are_you_sure_suspend: "本当に定期購入を中断しますか？"
+    resume_subscription: "再開"
+    subscribable: "定期購入可能？"
+    subscribed_price: "定期購入価格"
+    intervals: "定期購入間隔"
+    listing_subscriptions: "定期購入一覧"
+    edit: "編集"
+    back_to_list: "一覧に戻る"
+    none_found: "定期購入がありません"
+  intervals:
+    new: "定期購入間隔を作る"
+    edit: "定期購入間隔を編集する"
+    back_to_intervals_list: "一覧に戻る"
+    name: "表示名"
+    time: "毎に再注文"
+
+  subscriptions_config_label: "Subscriptions"
+  subscription_intervals: "Subscription Intervals"
+  new_subscription_interval: "New Subscription Interval"

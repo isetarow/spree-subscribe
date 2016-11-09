@@ -121,7 +121,11 @@ class Spree::Subscription < Spree::Base
 
   def complete_reorder
     self.new_order.update!
-    progress && self.new_order.save # -> complete
+    result = true
+    if new_order_state != "complete"
+      result = progress
+    end
+    result && self.new_order.save # -> complete
   end
 
   def calculate_reorder_date!

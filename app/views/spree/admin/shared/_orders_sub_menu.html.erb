@@ -1,6 +1,3 @@
-<% content_for :sub_menu do %>
-  <ul id="sub_nav" data-hook="admin_orders_sub_tabs" class="inline-menu">
-    <%= tab :orders, :match_path => '/orders' %>
-    <%= tab :subscriptions, :match_path => '/subscriptions' %>
-  </ul>
-<% end %>
+<ul id="sub_nav" data-hook="admin_orders_sub_tabs" class="inline-menu">
+  <%= tab :subscriptions, :match_path => '/subscriptions' %>
+</ul>
