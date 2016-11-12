@@ -20,7 +20,7 @@ ja:
     suspend_subscription: "中断"
     are_you_sure_suspend: "本当に定期購入を中断しますか？"
     resume_subscription: "再開"
-    subscribable: "定期購入可能？"
+    subscribable: "定期可能？"
     subscribed_price: "定期購入価格"
     intervals: "定期購入間隔"
     listing_subscriptions: "定期購入一覧"
@@ -34,6 +34,6 @@ ja:
     name: "表示名"
     time: "毎に再注文"
 
-  subscriptions_config_label: "Subscriptions"
-  subscription_intervals: "Subscription Intervals"
-  new_subscription_interval: "New Subscription Interval"
+  subscriptions_config_label: "定期購入"
+  subscription_intervals: "定期購入間隔"
+  new_subscription_interval: "新規定期購入間隔"

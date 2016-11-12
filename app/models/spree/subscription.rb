@@ -24,6 +24,7 @@ class Spree::Subscription < Spree::Base
   scope :cancelled, -> { where(state: 'cancelled') }
   scope :current, -> { where(state: ['active', 'inactive']) }
   scope :due, -> { active.where("reorder_on <= ?", Date.today) }
+  scope :next_week, -> (day) {active.where("reorder_on <= ?", day)}
 
   attr_accessor :new_order
 
@@ -44,6 +45,10 @@ class Spree::Subscription < Spree::Base
 
   def self.reorder_due!
     due.each(&:reorder)
+  end
+
+  def self.reorder_next_week!(day)
+    next_week(day).each(&:reorder)
   end
 
   # DD: TODO pull out into a ReorderBuilding someday

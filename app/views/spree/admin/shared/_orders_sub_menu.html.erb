@@ -1,3 +1,8 @@
 <ul id="sub_nav" data-hook="admin_orders_sub_tabs" class="inline-menu">
-  <%= tab :subscriptions, :match_path => '/subscriptions' %>
+  <ul>
+    <li><%= link_to '定期購入一覧', admin_subscriptions_path %></li>
+    <li><%= link_to '次期配送予定', admin_check_orders_path %></li>
+  </ul>
+
+
 </ul>

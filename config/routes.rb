@@ -6,6 +6,7 @@ Spree::Core::Engine.routes.draw do
       end
     end
     resources :subscriptions, :except => [:new,:create]
+    resources :check_orders, only: [:index]
   end
 
   resources :subscriptions, :only => [:destroy]
