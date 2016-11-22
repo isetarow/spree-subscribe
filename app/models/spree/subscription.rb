@@ -24,7 +24,7 @@ class Spree::Subscription < Spree::Base
   scope :cancelled, -> { where(state: 'cancelled') }
   scope :current, -> { where(state: ['active', 'inactive']) }
   scope :due, -> { active.where("reorder_on <= ?", Date.today) }
-  scope :next_week, -> (day) {active.where("reorder_on <= ?", day)}
+  scope :next_week, -> (day) { active.where("reorder_on <= ?", day) }
 
   attr_accessor :new_order
 
@@ -33,7 +33,7 @@ class Spree::Subscription < Spree::Base
       transition :to => 'inactive', :from => 'active'
     end
     event :start, :resume do
-      transition :to => 'active', :from => ['cart','inactive']
+      transition :to => 'active', :from => ['cart', 'inactive']
     end
     event :cancel do
       transition :to => 'cancelled', :from => 'active'
@@ -49,6 +49,26 @@ class Spree::Subscription < Spree::Base
 
   def self.reorder_next_week!(day)
     next_week(day).each(&:reorder)
+  end
+
+  def self.check_products_stocks(day)
+    ps = {}
+    next_week(day).each do |subscription|
+      subscription.order.shipments.each do |shipment|
+        shipment.manifest.each do |manifest|
+          p_id = manifest.product.id
+          ps[p_id] ||= 0
+          ps[p_id] = ps[p_id] + manifest.quantity
+        end
+      end
+    end
+    errors = {}
+    ps.each do |id, count|
+      p = Spree::Product.find(id)
+      stock = p.stock_items.sum(:count_on_hand)
+      errors[p] = {count: count, stock: stock} if count > stock
+    end
+    errors
   end
 
   # DD: TODO pull out into a ReorderBuilding someday
@@ -77,7 +97,8 @@ class Spree::Subscription < Spree::Base
         ship_address: self.shipping_address.clone,
         subscription_id: self.id,
         email: self.user.email,
-        user_id: self.user_id
+        user_id: self.user_id,
+        last_ip_address: self.order.last_ip_address || '127.0.0.1'
     )
 
     self.new_order.store_id = self.line_items.first.order.store_id if self.new_order.respond_to?(:store_id)
@@ -104,7 +125,7 @@ class Spree::Subscription < Spree::Base
     puts " -> selecting shipping rate..."
 
     shipment = self.new_order.shipments.first # DD: there should be only one shipment
-    rate = shipment.shipping_rates.first{|r| r.shipping_method.id == self.shipping_method.id }
+    rate = shipment.shipping_rates.first { |r| r.shipping_method.id == self.shipping_method.id }
     raise "No rate was found. TODO: Implement logic to select the cheapest rate." unless rate
     shipment.selected_shipping_rate_id = rate.id
     shipment.save
@@ -113,7 +134,31 @@ class Spree::Subscription < Spree::Base
   def add_payment
     puts " -> adding payment..."
     payment = self.new_order.payments.build(amount: self.new_order.outstanding_balance)
-    payment.source = self.source
+    case self.payment_method.type
+      when "Spree::Gateway::KomojuBankTransfer"
+        payment.source = Spree::BankTransfer.new(
+            email: self.source.email,
+            phone: self.source.phone,
+            given_name: self.source.given_name,
+            family_name: self.source.family_name,
+            given_name_kana: self.source.given_name_kana,
+            family_name_kana: self.source.family_name_kana,
+            user_id: self.source.user_id,
+            payment_method_id: self.source.payment_method_id
+        )
+      when "Spree::Gateway::KomojuCreditCard"
+        payment.source = Spree::CreditCard.new(
+            month: self.source.month,
+            year: self.source.year,
+            gateway_customer_profile_id: self.source.gateway_customer_profile_id,
+            name: self.source.name,
+            user_id: self.source.user_id,
+            payment_method_id: self.source.payment_method_id
+        )
+      else
+        payment.source = self.source
+    end
+    # payment.source = self.source.clone
     payment.payment_method = self.payment_method
     payment.save!
 
@@ -121,7 +166,13 @@ class Spree::Subscription < Spree::Base
   end
 
   def confirm_reorder
-    progress # -> confirm
+    res = false
+    if self.new_order.confirmation_required?
+      res = progress # -> confirm
+    else
+      res = true
+    end
+    res
   end
 
   def complete_reorder

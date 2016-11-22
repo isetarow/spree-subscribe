@@ -5,7 +5,7 @@
 <% end %>
 
 <% content_for :page_actions do %>
-    <%= button_to '指定日付までの注文を作成する', admin_check_orders_path, class: 'btn btn-danger' %>
+    <%= button_to '指定日付までの注文を作成する', confirm_admin_check_orders_path, params: { date: @date }, data: { confirm: "#{@date.strftime("%Y/%m/%d")}までの注文を作成します。操作は取り消しできませんのでもう一度ご確認ください。" }, class: 'btn btn-danger' %>
 <% end %>
 
 <div style="maegin-top: 100px;">
@@ -33,14 +33,17 @@
       <th>商品名</th>
       <th>SLUG</th>
       <th>個数</th>
+      <th>在庫</th>
       </thead>
       <tbody>
       <% products.group_by { |p| p.id }.to_h.each do |k, v| %>
-          <tr>
+          <% stock = v.first.stock_items.sum(:count_on_hand) %>
+          <tr style="background-color: <%= v.count > stock ? '#f2dede' : '' %>">
             <td><%= v.first.id %></td>
             <td><%= v.first.name %></td>
             <td><%= v.first.slug %></td>
             <td><%= v.count %></td>
+            <td><%= stock %></td>
           </tr>
       <% end %>
       </tbody>
